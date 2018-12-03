@@ -140,12 +140,12 @@ func getTalk(id string) (*TalkInfo, error) {
 			}
 			if value != "" && to != nil {
 				// found useful info in <input>
-				*to = value
+				*to = html.UnescapeString(value)
 			}
 			if value == "" && to != nil {
 				// found useful info in <textarea>
 				r.Next()
-				*to = r.Token().String()
+				*to = html.UnescapeString(r.Token().String())
 				if *to == "</textarea>" {
 					*to = "" // no content
 				}
