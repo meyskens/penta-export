@@ -58,7 +58,7 @@ func main() {
 			continue
 		}
 		talk, _ := getTalk(data[0])
-		fmt.Printf("%s,%s,%s,%s,%s,%s\n", csvFriendlify(talk.ID), csvFriendlify(talk.Title), csvFriendlify(talk.Subtitle), csvFriendlify(talk.Abstract), csvFriendlify(talk.Description), csvFriendlify(talk.Notes))
+		fmt.Printf(`%s,"%s","%s","%s","%s","%s"\n`, csvFriendlify(talk.ID), csvFriendlify(talk.Title), csvFriendlify(talk.Subtitle), csvFriendlify(talk.Abstract), csvFriendlify(talk.Description), csvFriendlify(talk.Notes))
 	}
 
 }
@@ -160,7 +160,7 @@ func getTalk(id string) (*TalkInfo, error) {
 }
 
 func csvFriendlify(in string) string {
-	return strings.Replace(strings.Replace(in, ",", "\\,", -1), "\n", "\\n", -1)
+	return strings.Replace(strings.Replace(in, "\"", "\"\",", -1), "\n", "\\n", -1)
 }
 
 func doRequest(url string, query map[string]string) (*http.Response, error) {
