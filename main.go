@@ -24,6 +24,7 @@ type Config struct {
 type TalkInfo struct {
 	ID          string
 	Title       string
+	Notes       string
 	Subtitle    string
 	Abstract    string
 	Description string
@@ -47,7 +48,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("ID,Title,Subtitle,Abstract,Description")
+	fmt.Println("ID,Title,Subtitle,Abstract,Description,Notes")
 	for _, line := range strings.Split(string(csv), "\n") {
 		data := strings.Split(line, ",")
 		if len(data) < 2 { // invalid line
@@ -57,7 +58,7 @@ func main() {
 			continue
 		}
 		talk, _ := getTalk(data[0])
-		fmt.Printf("%s,%s,%s,%s,%s\n", csvFriendlify(talk.ID), csvFriendlify(talk.Title), csvFriendlify(talk.Subtitle), csvFriendlify(talk.Abstract), csvFriendlify(talk.Description))
+		fmt.Printf("%s,%s,%s,%s,%s,%s\n", csvFriendlify(talk.ID), csvFriendlify(talk.Title), csvFriendlify(talk.Subtitle), csvFriendlify(talk.Abstract), csvFriendlify(talk.Description), csvFriendlify(talk.Notes))
 	}
 
 }
@@ -133,6 +134,8 @@ func getTalk(id string) (*TalkInfo, error) {
 					to = &info.Abstract
 				} else if attr.Key == "id" && attr.Val == "event[description]" {
 					to = &info.Description
+				} else if attr.Key == "id" && attr.Val == "event[submission_notes]" {
+					to = &info.Notes
 				}
 			}
 			if value != "" && to != nil {
@@ -144,6 +147,9 @@ func getTalk(id string) (*TalkInfo, error) {
 				r.Next()
 				*to = r.Token().String()
 				if *to == "</textarea>" {
+					*to = "" // no content
+				}
+				if *to == "</td>" {
 					*to = "" // no content
 				}
 			}
