@@ -58,7 +58,7 @@ func main() {
 			continue
 		}
 		talk, _ := getTalk(data[0])
-		fmt.Printf(`%s,"%s","%s","%s","%s","%s"\n`, csvFriendlify(talk.ID), csvFriendlify(talk.Title), csvFriendlify(talk.Subtitle), csvFriendlify(talk.Abstract), csvFriendlify(talk.Description), csvFriendlify(talk.Notes))
+		fmt.Printf("%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n", csvFriendlify(talk.ID), csvFriendlify(talk.Title), csvFriendlify(talk.Subtitle), csvFriendlify(talk.Abstract), csvFriendlify(talk.Description), csvFriendlify(talk.Notes))
 	}
 
 }
