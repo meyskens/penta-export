@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/src-d/envconfig"
+	"github.com/kelseyhightower/envconfig"
 	"golang.org/x/net/html"
 )
 
@@ -17,7 +17,7 @@ type Config struct {
 	PentaURL  string `default:"https://penta.fosdem.org"`
 	Username  string `required:"true"`
 	Password  string `required:"true"`
-	DevroomID string `required:"true"`
+	DevroomID string `required:"true" envconfig:"devroom_id"`
 }
 
 // TalkInfo is the info of a talk proposal
