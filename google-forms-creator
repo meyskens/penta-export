@@ -1,0 +1,24 @@
+# This file doesn't use the CSV directly (yet, PRs welcome)
+# This is used to automaticly make a google form out of the talks
+
+function myFunction() {
+  var form = FormApp.create('New Form');
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getActiveSheet();
+  var rangeData = sheet.getDataRange();
+  var searchRange = sheet.getRange(1,1, 54);
+  
+  // Get array of values in the search Range
+  var rangeValues = searchRange.getValues();
+  // Loop through array and if condition met, add relevant
+  // background color.
+  for ( i = 1; i < 54; i++){
+    form.addScaleItem()
+    .setTitle(sheet.getRange(i, 4).getValues()[0][0])
+    .setHelpText(sheet.getRange(i, 5).getValues()[0][0])
+    .setBounds(1, 5);
+  };
+ 
+  Logger.log('Published URL: ' + form.getPublishedUrl());
+  Logger.log('Editor URL: ' + form.getEditUrl());
+}
