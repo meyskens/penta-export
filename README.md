@@ -5,11 +5,7 @@ Penta Export is a project designed to quickly export talk proposals of a specifi
 
 ## Requirements
 
-In order to build this from scratch you need two packages:
-```bash
-go get golang.org/x/net/html
-go get github.com/src-d/envconfig
-```
+In order to build this you will need Go 1.11+ installed.
 
 ## Configuration
 
