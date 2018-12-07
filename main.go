@@ -28,6 +28,7 @@ type TalkInfo struct {
 	Subtitle    string
 	Abstract    string
 	Description string
+	Duration    string
 }
 
 var config Config
@@ -48,7 +49,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("ID,Title,Subtitle,Abstract,Description,Notes")
+	fmt.Println("ID,Title,Subtitle,Abstract,Description,Notes,Duration")
 	for _, line := range strings.Split(string(csv), "\n") {
 		data := strings.Split(line, ",")
 		if len(data) < 2 { // invalid line
@@ -58,7 +59,7 @@ func main() {
 			continue
 		}
 		talk, _ := getTalk(data[0])
-		fmt.Printf("%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n", csvFriendlify(talk.ID), csvFriendlify(talk.Title), csvFriendlify(talk.Subtitle), csvFriendlify(talk.Abstract), csvFriendlify(talk.Description), csvFriendlify(talk.Notes))
+		fmt.Printf("%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n", csvFriendlify(talk.ID), csvFriendlify(talk.Title), csvFriendlify(talk.Subtitle), csvFriendlify(talk.Abstract), csvFriendlify(talk.Description), csvFriendlify(talk.Notes), csvFriendlify(data[7]))
 	}
 
 }
