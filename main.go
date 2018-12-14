@@ -29,6 +29,8 @@ type TalkInfo struct {
 	Abstract    string
 	Description string
 	Duration    string
+	State       string
+	Progress    string
 }
 
 var config Config
@@ -49,7 +51,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("ID,Title,Subtitle,Abstract,Description,Notes,Duration")
+	fmt.Println("ID,Title,Subtitle,Abstract,Description,Notes,Duration,State,Progress")
 	for _, line := range strings.Split(string(csv), "\n") {
 		data := strings.Split(line, ",")
 		if len(data) < 2 { // invalid line
@@ -59,7 +61,7 @@ func main() {
 			continue
 		}
 		talk, _ := getTalk(data[0])
-		fmt.Printf("%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n", csvFriendlify(talk.ID), csvFriendlify(talk.Title), csvFriendlify(talk.Subtitle), csvFriendlify(talk.Abstract), csvFriendlify(talk.Description), csvFriendlify(talk.Notes), csvFriendlify(data[7]))
+		fmt.Printf("%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n", csvFriendlify(talk.ID), csvFriendlify(talk.Title), csvFriendlify(talk.Subtitle), csvFriendlify(talk.Abstract), csvFriendlify(talk.Description), csvFriendlify(talk.Notes), csvFriendlify(data[7]), csvFriendlify(talk.State), csvFriendlify(talk.Progress))
 	}
 
 }
@@ -153,6 +155,53 @@ func getTalk(id string) (*TalkInfo, error) {
 				if *to == "</td>" {
 					*to = "" // no content
 				}
+			}
+		}
+
+		if token.Data == "select" {
+			var to *string
+			found := false
+			value := ""
+			for _, attr := range token.Attr {
+				if attr.Key == "id" && attr.Val == "event[event_state]" {
+					to = &info.State
+					found = true
+				} else if attr.Key == "id" && attr.Val == "event[event_state_progress]" {
+					to = &info.Progress
+					found = true
+				}
+			}
+			if !found {
+				continue
+			}
+
+			for {
+				tt = r.Next()
+				if tt == html.ErrorToken {
+					break
+				}
+				token = r.Token()
+
+				selected := false
+				val := ""
+				for _, attr := range token.Attr {
+					if attr.Key == "selected" && attr.Val == "selected" {
+						selected = true
+					} else if attr.Key == "value" {
+						val = attr.Val
+					}
+				}
+				if selected && val != "" {
+					value = val
+				}
+
+				if token.Data == "select" && token.Type == html.EndTagToken {
+					break
+				}
+			}
+
+			if value != "" && to != nil {
+				*to = html.UnescapeString(value)
 			}
 		}
 	}
