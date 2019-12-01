@@ -1,21 +1,27 @@
-# This file doesn't use the CSV directly (yet, PRs welcome)
-# This is used to automaticly make a google form out of the talks
+/*
+  This function can be ran from importing the CSV into Google Sheets
+  It will turn the entries into a Google Form with the title and all added text and a vote option from 1 to 5.
+  Do not forget to change `var lines`
+*
 
 function myFunction() {
+  // change me to the number of lines
+  var lines = 40;
+  
   var form = FormApp.create('New Form');
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getActiveSheet();
   var rangeData = sheet.getDataRange();
-  var searchRange = sheet.getRange(1,1, 54);
+  var searchRange = sheet.getRange(1,1, lines);
   
   // Get array of values in the search Range
   var rangeValues = searchRange.getValues();
   // Loop through array and if condition met, add relevant
   // background color.
-  for ( i = 1; i < 54; i++){
+  for ( i = 1; i < lines; i++){
     form.addScaleItem()
-    .setTitle(sheet.getRange(i, 4).getValues()[0][0])
-    .setHelpText(sheet.getRange(i, 5).getValues()[0][0])
+    .setTitle(sheet.getRange(i, 2).getValues()[0][0] + " - " + sheet.getRange(i, 3).getValues()[0][0])
+    .setHelpText(sheet.getRange(i, 4).getValues()[0][0] + "\n" + sheet.getRange(i, 5).getValues()[0][0] + "\n" + sheet.getRange(i, 6).getValues()[0][0])
     .setBounds(1, 5);
   };
  
