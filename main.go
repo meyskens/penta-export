@@ -35,6 +35,7 @@ type TalkInfo struct {
 	PersonID    string
 }
 
+// PersonInfo is the info the talk submitter
 type PersonInfo struct {
 	FirstName string
 	Email     string
