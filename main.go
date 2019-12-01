@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/kelseyhightower/envconfig"
 	"golang.org/x/net/html"
 )
@@ -167,7 +166,6 @@ func getTalk(id string) (*TalkInfo, error) {
 		}
 
 		if strings.Contains(token.Data, "add_event_person") {
-			spew.Dump(token.Data)
 			op := strings.Split(token.Data, ";")
 			parts := strings.Split(op[0], ",")
 			id := strings.Replace(parts[2], "'", "", -1)
