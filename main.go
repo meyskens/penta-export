@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/kelseyhightower/envconfig"
 	"golang.org/x/net/html"
 )
@@ -31,6 +32,13 @@ type TalkInfo struct {
 	Duration    string
 	State       string
 	Progress    string
+	PersonID    string
+}
+
+// PersonInfo is the info the talk submitter
+type PersonInfo struct {
+	FirstName string
+	Email     string
 }
 
 var config Config
@@ -61,9 +69,9 @@ func main() {
 			continue
 		}
 		talk, _ := getTalk(data[0])
-		fmt.Printf("%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n", csvFriendlify(talk.ID), csvFriendlify(talk.Title), csvFriendlify(talk.Subtitle), csvFriendlify(talk.Abstract), csvFriendlify(talk.Description), csvFriendlify(talk.Notes), csvFriendlify(data[7]), csvFriendlify(talk.State), csvFriendlify(talk.Progress))
+		person, _ := getPerson(talk.PersonID)
+		fmt.Printf("%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n", csvFriendlify(talk.ID), csvFriendlify(talk.Title), csvFriendlify(talk.Subtitle), csvFriendlify(talk.Abstract), csvFriendlify(talk.Description), csvFriendlify(talk.Notes), csvFriendlify(data[7]), csvFriendlify(talk.State), csvFriendlify(talk.Progress), csvFriendlify(person.FirstName), csvFriendlify(person.Email))
 	}
-
 }
 
 func getCSV() ([]byte, error) {
@@ -158,6 +166,15 @@ func getTalk(id string) (*TalkInfo, error) {
 			}
 		}
 
+		if strings.Contains(token.Data, "add_event_person") {
+			spew.Dump(token.Data)
+			op := strings.Split(token.Data, ";")
+			parts := strings.Split(op[0], ",")
+			id := strings.Replace(parts[2], "'", "", -1)
+
+			info.PersonID = id
+		}
+
 		if token.Data == "select" {
 			var to *string
 			found := false
@@ -202,6 +219,53 @@ func getTalk(id string) (*TalkInfo, error) {
 
 			if value != "" && to != nil {
 				*to = html.UnescapeString(value)
+			}
+		}
+	}
+
+	return &info, nil
+}
+
+func getPerson(id string) (*PersonInfo, error) {
+	resp, err := doRequest(fmt.Sprintf("/person/edit/%s", id), nil)
+	if err != nil {
+		return nil, err
+	}
+	info := PersonInfo{}
+
+	r := html.NewTokenizer(resp.Body)
+	for {
+		tt := r.Next()
+		if tt == html.ErrorToken {
+			break
+		}
+		token := r.Token()
+		if token.Data == "input" || token.Data == "textarea" {
+			var to *string
+			value := ""
+			for _, attr := range token.Attr {
+				if attr.Key == "value" {
+					value = attr.Val
+				} else if attr.Key == "id" && attr.Val == "person[first_name]" {
+					to = &info.FirstName
+				} else if attr.Key == "id" && attr.Val == "person[email]" {
+					to = &info.Email
+				}
+			}
+			if value != "" && to != nil {
+				// found useful info in <input>
+				*to = html.UnescapeString(value)
+			}
+			if value == "" && to != nil {
+				// found useful info in <textarea>
+				r.Next()
+				*to = html.UnescapeString(r.Token().String())
+				if *to == "</textarea>" {
+					*to = "" // no content
+				}
+				if *to == "</td>" {
+					*to = "" // no content
+				}
 			}
 		}
 	}
