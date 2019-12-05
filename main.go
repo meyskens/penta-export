@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -52,15 +54,23 @@ func main() {
 		config.PentaURL = "https://penta.fosdem.org"
 	}
 
-	csv, err := getCSV()
+	csvdata, err := getCSV()
 	if err != nil {
 		log.Fatal(err.Error())
 		os.Exit(1)
 	}
 
 	fmt.Println("ID,Title,Subtitle,Abstract,Description,Notes,Duration,State,Progress")
-	for _, line := range strings.Split(string(csv), "\n") {
-		data := strings.Split(line, ",")
+	r := csv.NewReader(strings.NewReader(string(csvdata[:])))
+	for {
+		data, err := r.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		if len(data) < 2 { // invalid line
 			continue
 		}
@@ -68,8 +78,9 @@ func main() {
 			continue
 		}
 		talk, _ := getTalk(data[0])
+		talk.Duration = data[7]
 		person, _ := getPerson(talk.PersonID)
-		fmt.Printf("%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n", csvFriendlify(talk.ID), csvFriendlify(talk.Title), csvFriendlify(talk.Subtitle), csvFriendlify(talk.Abstract), csvFriendlify(talk.Description), csvFriendlify(talk.Notes), csvFriendlify(data[7]), csvFriendlify(talk.State), csvFriendlify(talk.Progress), csvFriendlify(person.FirstName), csvFriendlify(person.Email))
+		fmt.Printf("%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n", csvFriendlify(talk.ID), csvFriendlify(talk.Title), csvFriendlify(talk.Subtitle), csvFriendlify(talk.Abstract), csvFriendlify(talk.Description), csvFriendlify(talk.Notes), csvFriendlify(talk.Duration), csvFriendlify(talk.State), csvFriendlify(talk.Progress), csvFriendlify(person.FirstName), csvFriendlify(person.Email))
 	}
 }
 
