@@ -60,7 +60,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("ID,Title,Subtitle,Abstract,Description,Notes,Duration,State,Progress")
+	fmt.Println("ID,Title,Subtitle,Abstract,Description,Notes,Duration,State,Progress,FirstName,Email")
 	r := csv.NewReader(strings.NewReader(string(csvdata[:])))
 	for {
 		data, err := r.Read()
