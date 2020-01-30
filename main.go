@@ -34,6 +34,7 @@ type TalkInfo struct {
 	State       string
 	Progress    string
 	PersonID    string
+	StartTime   string
 }
 
 // PersonInfo is the info the talk submitter
@@ -61,7 +62,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("ID,Title,Subtitle,Abstract,Description,Notes,Duration,State,Progress,FirstName,Email,LastName")
+	fmt.Println("ID,Title,Subtitle,Abstract,Description,Notes,Duration,State,Progress,FirstName,Email,LastName,StartTime")
 	r := csv.NewReader(strings.NewReader(string(csvdata[:])))
 	for {
 		data, err := r.Read()
@@ -80,8 +81,9 @@ func main() {
 		}
 		talk, _ := getTalk(data[0])
 		talk.Duration = data[7]
+		talk.StartTime = strings.TrimSuffix(data[5], ":00")
 		person, _ := getPerson(talk.PersonID)
-		fmt.Printf("%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n", csvFriendlify(talk.ID), csvFriendlify(talk.Title), csvFriendlify(talk.Subtitle), csvFriendlify(talk.Abstract), csvFriendlify(talk.Description), csvFriendlify(talk.Notes), csvFriendlify(talk.Duration), csvFriendlify(talk.State), csvFriendlify(talk.Progress), csvFriendlify(person.FirstName), csvFriendlify(person.Email), csvFriendlify(person.LastName))
+		fmt.Printf("%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n", csvFriendlify(talk.ID), csvFriendlify(talk.Title), csvFriendlify(talk.Subtitle), csvFriendlify(talk.Abstract), csvFriendlify(talk.Description), csvFriendlify(talk.Notes), csvFriendlify(talk.Duration), csvFriendlify(talk.State), csvFriendlify(talk.Progress), csvFriendlify(person.FirstName), csvFriendlify(person.Email), csvFriendlify(person.LastName), csvFriendlify(talk.StartTime))
 	}
 }
 
