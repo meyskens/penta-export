@@ -34,11 +34,13 @@ type TalkInfo struct {
 	State       string
 	Progress    string
 	PersonID    string
+	StartTime   string
 }
 
 // PersonInfo is the info the talk submitter
 type PersonInfo struct {
 	FirstName string
+	LastName  string
 	Email     string
 }
 
@@ -60,7 +62,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("ID,Title,Subtitle,Abstract,Description,Notes,Duration,State,Progress")
+	fmt.Println("ID,Title,Subtitle,Abstract,Description,Notes,Duration,State,Progress,FirstName,Email,LastName,StartTime")
 	r := csv.NewReader(strings.NewReader(string(csvdata[:])))
 	for {
 		data, err := r.Read()
@@ -79,8 +81,9 @@ func main() {
 		}
 		talk, _ := getTalk(data[0])
 		talk.Duration = data[7]
+		talk.StartTime = strings.TrimSuffix(data[5], ":00")
 		person, _ := getPerson(talk.PersonID)
-		fmt.Printf("%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n", csvFriendlify(talk.ID), csvFriendlify(talk.Title), csvFriendlify(talk.Subtitle), csvFriendlify(talk.Abstract), csvFriendlify(talk.Description), csvFriendlify(talk.Notes), csvFriendlify(talk.Duration), csvFriendlify(talk.State), csvFriendlify(talk.Progress), csvFriendlify(person.FirstName), csvFriendlify(person.Email))
+		fmt.Printf("%s,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n", csvFriendlify(talk.ID), csvFriendlify(talk.Title), csvFriendlify(talk.Subtitle), csvFriendlify(talk.Abstract), csvFriendlify(talk.Description), csvFriendlify(talk.Notes), csvFriendlify(talk.Duration), csvFriendlify(talk.State), csvFriendlify(talk.Progress), csvFriendlify(person.FirstName), csvFriendlify(person.Email), csvFriendlify(person.LastName), csvFriendlify(talk.StartTime))
 	}
 }
 
@@ -177,11 +180,17 @@ func getTalk(id string) (*TalkInfo, error) {
 		}
 
 		if strings.Contains(token.Data, "add_event_person") {
-			op := strings.Split(token.Data, ";")
-			parts := strings.Split(op[0], ",")
-			id := strings.Replace(parts[2], "'", "", -1)
-
-			info.PersonID = id
+			ops := strings.Split(token.Data, ";")
+			for _, op := range ops {
+				if ! strings.Contains(op, "add_event_person") {
+					continue
+				}
+				parts := strings.Split(op, ",")
+				id := strings.Replace(parts[2], "'", "", -1)
+				if parts[3] == "'speaker'" {
+					info.PersonID = id
+				}
+			}
 		}
 
 		if token.Data == "select" {
@@ -257,6 +266,8 @@ func getPerson(id string) (*PersonInfo, error) {
 					value = attr.Val
 				} else if attr.Key == "id" && attr.Val == "person[first_name]" {
 					to = &info.FirstName
+				} else if attr.Key == "id" && attr.Val == "person[last_name]" {
+					to = &info.LastName
 				} else if attr.Key == "id" && attr.Val == "person[email]" {
 					to = &info.Email
 				}
