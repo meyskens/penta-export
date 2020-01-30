@@ -177,11 +177,17 @@ func getTalk(id string) (*TalkInfo, error) {
 		}
 
 		if strings.Contains(token.Data, "add_event_person") {
-			op := strings.Split(token.Data, ";")
-			parts := strings.Split(op[0], ",")
-			id := strings.Replace(parts[2], "'", "", -1)
-
-			info.PersonID = id
+			ops := strings.Split(token.Data, ";")
+			for _, op := range ops {
+				if ! strings.Contains(op, "add_event_person") {
+					continue
+				}
+				parts := strings.Split(op, ",")
+				id := strings.Replace(parts[2], "'", "", -1)
+				if parts[3] == "'speaker'" {
+					info.PersonID = id
+				}
+			}
 		}
 
 		if token.Data == "select" {
